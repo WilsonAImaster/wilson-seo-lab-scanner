@@ -1,0 +1,23 @@
+{
+  "name": "open-seo-lab-scanner",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Open-source SEO scanner MVP for Cloudflare Pages.",
+  "type": "module",
+  "scripts": {
+    "check": "node --check assets/app.js && node --check functions/api/lab-scan.js",
+    "dev": "wrangler pages dev . --compatibility-date=2026-06-24",
+    "deploy": "wrangler pages deploy . --project-name open-seo-lab-scanner"
+  },
+  "devDependencies": {
+    "wrangler": "^4.103.0"
+  },
+  "keywords": [
+    "seo",
+    "cloudflare-pages",
+    "pages-functions",
+    "seo-scanner",
+    "mvp"
+  ],
+  "license": "MIT"
+}

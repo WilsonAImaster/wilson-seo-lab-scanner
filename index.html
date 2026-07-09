@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open SEO Lab Scanner</title>
+    <meta
+      name="description"
+      content="一個可部署到 Cloudflare Pages 的開源 SEO 健檢 MVP，輸入網址後產生首頁訊號、分數、證據與修復優先序。"
+    />
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <nav class="nav" aria-label="Main navigation">
+        <a class="brand" href="#top" aria-label="Open SEO Lab Scanner">
+          <span class="brand-mark">OS</span>
+          <span>Open SEO Lab Scanner</span>
+        </a>
+        <div class="nav-links">
+          <a href="#scanner">Scanner</a>
+          <a href="#checks">Checks</a>
+          <a href="#architecture">Architecture</a>
+          <a href="#roadmap">Roadmap</a>
+        </div>
+        <button class="control-button" type="button" data-theme-toggle>Night</button>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-inner">
+          <div>
+            <p class="eyebrow">Open Source SEO MVP</p>
+            <h1>把網站健檢變成可驗證的 Lab Brief</h1>
+            <p class="hero-copy">
+              這是一個開源 SEO scanner 範本：由 Cloudflare Pages Function 實際抓取公開首頁，
+              檢查 title、description、H1、canonical、robots、sitemap、schema、alt 與內部連結，
+              再整理成分數、證據與修復優先序。
+            </p>
+            <div class="proof-strip" aria-label="Project highlights">
+              <div class="proof-item">
+                <span class="proof-value">0 deps</span>
+                <span class="proof-label">前端無框架</span>
+              </div>
+              <div class="proof-item">
+                <span class="proof-value">Edge</span>
+                <span class="proof-label">Pages Function 掃描</span>
+              </div>
+              <div class="proof-item">
+                <span class="proof-value">MVP</span>
+                <span class="proof-label">適合 fork 與改造</span>
+              </div>
+            </div>
+          </div>
+
+          <section class="scan-panel" id="scanner" aria-label="SEO scanner form">
+            <div class="panel-head">
+              <div>
+                <p class="panel-kicker">Scanner</p>
+                <h2 class="panel-title">輸入網址產生 Lab Brief</h2>
+              </div>
+              <span class="status-pill"><span class="status-dot"></span>Live MVP</span>
+            </div>
+
+            <form class="scan-form" id="scanForm">
+              <div class="field">
+                <label for="siteUrl">網站網址</label>
+                <input id="siteUrl" name="siteUrl" inputmode="url" placeholder="example.com" required />
+              </div>
+              <button class="button" type="submit" id="scanButton">開始掃描</button>
+            </form>
+
+            <button class="human-check" id="humanCheck" type="button" aria-pressed="false">
+              <span><span class="fake-checkbox" aria-hidden="true"></span><span data-human-label>點選確認不是自動大量掃描</span></span>
+              <small>MVP placeholder, production can connect Turnstile</small>
+            </button>
+
+            <div class="mini-preview">
+              <div>
+                <strong>Technical</strong>
+                <span>HTTP、HTTPS、robots、sitemap、response time</span>
+              </div>
+              <div>
+                <strong>Snippet</strong>
+                <span>title、description、H1、canonical、Open Graph</span>
+              </div>
+              <div>
+                <strong>Structure</strong>
+                <span>schema、alt coverage、internal links、readable text</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="section result" id="result" aria-live="polite">
+        <aside class="score-card">
+          <p class="report-id" id="reportId">REPORT OSL-000000</p>
+          <div class="score-ring" id="scoreRing">
+            <div class="score-inner">
+              <span class="score-label">Score</span>
+              <span class="score-number" id="scoreNumber">--</span>
+              <span class="score-label">/ 100</span>
+            </div>
+          </div>
+          <div class="grade-box">
+            <span class="badge" id="gradeBadge">Waiting</span>
+            <h2 id="gradeTitle">等待掃描</h2>
+            <p id="gradeText">送出網址後，這裡會顯示實際首頁 SEO 訊號摘要。</p>
+          </div>
+        </aside>
+
+        <div class="result-stack">
+          <section class="card">
+            <div class="card-head">
+              <div>
+                <h2>掃描證據</h2>
+                <p>這些欄位由後端實際抓取目標網站後產生。</p>
+              </div>
+              <span class="badge" id="evidenceBadge">Pending</span>
+            </div>
+            <dl class="evidence-grid" id="scanEvidence"></dl>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <div>
+                <h2>檢查維度</h2>
+                <p>將掃描結果拆成四個可行動維度。</p>
+              </div>
+              <span class="badge">Vitals</span>
+            </div>
+            <div class="dimension-list" id="dimensions"></div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <div>
+                <h2 id="issueTitle">優先修復項目</h2>
+                <p id="issueDescription">掃描後會先顯示最值得處理的項目。</p>
+              </div>
+              <span class="badge" id="issueBadge">Top</span>
+            </div>
+            <div class="issue-list" id="issues"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="section section-grid" id="checks">
+        <div class="section-head">
+          <p class="eyebrow">Checks</p>
+          <h2>這個 MVP 目前會檢查什麼</h2>
+          <p>它不是完整商業 SEO 平台，而是一個透明、可 fork、可部署的實驗起點。</p>
+        </div>
+        <div class="grid-3">
+          <article class="info-card">
+            <span class="icon-box">01</span>
+            <h3>可讀性</h3>
+            <p>確認狀態碼、HTTPS、HTML content-type、response time、robots 與 sitemap。</p>
+          </article>
+          <article class="info-card">
+            <span class="icon-box">02</span>
+            <h3>搜尋摘要</h3>
+            <p>檢查 title、meta description、H1、canonical 與社群摘要訊號。</p>
+          </article>
+          <article class="info-card">
+            <span class="icon-box">03</span>
+            <h3>內容結構</h3>
+            <p>統計 JSON-LD、圖片 alt、內部連結與首頁可讀文字量。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-band" id="architecture">
+        <div class="section">
+          <div class="section-head">
+            <p class="eyebrow">Architecture</p>
+            <h2>靜態前端，加上一個 Pages Function API</h2>
+            <p>前端負責互動與結果渲染，後端 Function 負責抓取公開網頁與產生報告 JSON。</p>
+          </div>
+          <div class="flow">
+            <span>Browser</span>
+            <span>/api/lab-scan</span>
+            <span>Target homepage</span>
+            <span>Lab Brief JSON</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="roadmap">
+        <div class="section-head">
+          <p class="eyebrow">Roadmap</p>
+          <h2>適合後續擴充的方向</h2>
+        </div>
+        <ul class="roadmap-list">
+          <li>Cloudflare Turnstile 驗證與 rate limit</li>
+          <li>Email / PDF 報告寄送</li>
+          <li>Google Search Console 匯入高曝光低點擊頁</li>
+          <li>WordPress title/meta/schema patch workflow</li>
+          <li>將掃描結果轉成 AI agent 可執行任務</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <h2>Open SEO Lab Scanner</h2>
+        <p>Built as a transparent SEO scanner MVP by Wilson AI Lab.</p>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="assets/app.js"></script>
+  </body>
+</html>
